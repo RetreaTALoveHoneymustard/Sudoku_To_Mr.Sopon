@@ -9,8 +9,11 @@ int[][] num = new int[grid_size][grid_size];
 int[][][] position_num = new int[grid_size][grid_size][4];
 int[] clicked_cell = null;
 
-void setup() {
+void settings() {
   size(canvas_width, canvas_height);
+}
+
+void setup() {
   initializeGrid();
 }
 
