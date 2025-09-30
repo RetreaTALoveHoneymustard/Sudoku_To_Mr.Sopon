@@ -7,10 +7,18 @@ int selectorH     = 50;
 
 int cell_w, cell_h, cellSelectorW, selectorTop;
 int[][] num        = new int[grid_size][grid_size];
+boolean[][] isError = new boolean[grid_size][grid_size];
 int[][] solution   = new int[grid_size][grid_size];
 
 int[] clicked_cell = null;
 Integer selectedNumber = null;
+
+boolean showCorrect = false;
+
+// Buttons
+int btnW = 160, btnH = 45;
+int resetX = 60, resetY;
+int showX, showY;
 
 void settings() {
   size(canvas_width, canvas_height);
@@ -22,6 +30,10 @@ void setup() {
   cellSelectorW = canvas_width / grid_size;
   selectorTop = grid_bottom + 20;
 
+  resetY = grid_bottom + 100;
+  showY  = grid_bottom + 100;
+  showX  = 280;
+
   generatePuzzle();
 }
 
@@ -29,7 +41,9 @@ void draw() {
   background(255);
   draw_table();
   drawNumbers();
+  drawErrors();
   drawNumberSelector();
+  drawButtons();
   if (clicked_cell != null) {
     draw_circle_in_cell(clicked_cell[0], clicked_cell[1]);
   }
@@ -52,17 +66,38 @@ void draw_table() {
 void drawNumbers() {
   textSize(24);
   textAlign(CENTER, CENTER);
-  fill(0);
   for (int r = 0; r < grid_size; r++) {
     for (int c = 0; c < grid_size; c++) {
-      if (num[r][c] != 0) {
+      int n = num[r][c];
+      if (n != 0) {
         int x = c * cell_w + cell_w/2;
         int y = grid_top + r * cell_h + cell_h/2;
-        text(num[r][c], x, y);
+        if (showCorrect && n == solution[r][c]) {
+          fill(0,180,0); // green for correct
+        } else {
+          fill(0); // black for normal
+        }
+        text(n, x, y);
       }
     }
   }
 }
+
+void drawErrors() {
+  noFill();
+  stroke(255,0,0);
+  strokeWeight(3);
+  for (int r = 0; r < grid_size; r++) {
+    for (int c = 0; c < grid_size; c++) {
+      if (isError[r][c]) {
+        int x = c * cell_w;
+        int y = grid_top + r * cell_h;
+        rect(x, y, cell_w, cell_h);
+      }
+    }
+  }
+}
+
 
 void drawNumberSelector() {
   for (int i = 0; i < grid_size; i++) {
@@ -78,79 +113,106 @@ void drawNumberSelector() {
   }
 }
 
-void draw_circle_in_cell(int row, int col) {
-  noStroke();
-  fill(255,0,0,150);
-  float x = col * cell_w + cell_w/2;
-  float y = grid_top + row * cell_h + cell_h/2;
-  ellipse(x, y, cell_w/2, cell_h/2);
+void drawButtons() {
+  fill(230);
+  stroke(0);
+  rect(resetX, resetY, btnW, btnH, 10);
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text("Reset Puzzle", resetX + btnW/2, resetY + btnH/2);
+
+  fill(showCorrect ? color(150,255,150) : 230);
+  stroke(0);
+  rect(showX, showY, btnW, btnH, 10);
+  fill(0);
+  text("Show Correct", showX + btnW/2, showY + btnH/2);
 }
 
-boolean inBox(int mx, int my, int x, int y, int x2, int y2) {
-  return mx > x && mx < x2 && my > y && my < y2;
+boolean inBox(int mx,int my,int x,int y,int x2,int y2){
+  return mx>x && mx<x2 && my>y && my<y2;
 }
 
 void mousePressed() {
-  // select grid cell
-  for (int r = 0; r < grid_size; r++) {
-    for (int c = 0; c < grid_size; c++) {
-      int x1 = c * cell_w;
-      int y1 = grid_top + r * cell_h;
-      int x2 = x1 + cell_w;
-      int y2 = y1 + cell_h;
-      if (inBox(mouseX, mouseY, x1, y1, x2, y2)) {
-        clicked_cell = new int[]{r, c};
+  // Select cell
+  for(int r=0;r<grid_size;r++){
+    for(int c=0;c<grid_size;c++){
+      int x1=c*cell_w;
+      int y1=grid_top+r*cell_h;
+      int x2=x1+cell_w;
+      int y2=y1+cell_h;
+      if(inBox(mouseX,mouseY,x1,y1,x2,y2)){
+        clicked_cell=new int[]{r,c};
         return;
       }
     }
   }
-  // select number
-  if (mouseY >= selectorTop && mouseY <= selectorTop + selectorH) {
-    for (int i = 0; i < grid_size; i++) {
-      int x = i * cellSelectorW;
-      if (mouseX >= x && mouseX <= x + cellSelectorW) {
-        selectedNumber = i+1;
-        if (clicked_cell != null) {
-          int r = clicked_cell[0], c = clicked_cell[1];
-          num[r][c] = selectedNumber;
+  // Select number
+  if(mouseY>=selectorTop && mouseY<=selectorTop+selectorH){
+    for(int i=0;i<grid_size;i++){
+      int x=i*cellSelectorW;
+      if(mouseX>=x && mouseX<=x+cellSelectorW){
+        selectedNumber=i+1;
+        if(clicked_cell!=null){
+          int r=clicked_cell[0], c=clicked_cell[1];
+          num[r][c]=selectedNumber;
         }
         return;
       }
     }
   }
-}
-
-void generatePuzzle() {
-  solution = generateSolution();
-
-  // fill random numbers from solution
-  for (int r = 0; r < grid_size; r++) {
-    for (int c = 0; c < grid_size; c++) {
-      if (random(1) > 0.5) {
-        num[r][c] = solution[r][c];
-      } else {
-        num[r][c] = 0;
-      }
-    }
+  // Reset button
+  if(inBox(mouseX,mouseY,resetX,resetY,resetX+btnW,resetY+btnH)){
+    generatePuzzle();
+    clicked_cell=null;
+    selectedNumber=null;
+    showCorrect=false;
+    for(int i=0;i<grid_size;i++)
+      for(int j=0;j<grid_size;j++)
+        isError[i][j]=false;
+    return;
+  }
+  // Show Correct button
+  if(inBox(mouseX,mouseY,showX,showY,showX+btnW,showY+btnH)){
+    showCorrect=!showCorrect;
+    return;
   }
 }
 
-int[][] generateSolution() {
-  int[][] b = new int[grid_size][grid_size];
+/*void keyPressed(){
+  if(clicked_cell!=null){
+    int r=clicked_cell[0], c=clicked_cell[1];
+    if(key>='1' && key<='9') num[r][c]=key-'0';
+    else if(key=='0' || keyCode==BACKSPACE || keyCode==DELETE) num[r][c]=0;
+  }
+  if(key=='c' || key=='C') checkSolution();
+  if(key=='r' || key=='R'){
+    generatePuzzle();
+    clicked_cell=null;
+    selectedNumber=null;
+    showCorrect=false;
+    for(int i=0;i<grid_size;i++)
+      for(int j=0;j<grid_size;j++)
+        isError[i][j]=false;
+  }
+} android mode don't usage*/
+
+int[][] generateSolution(){
+  int[][] b=new int[grid_size][grid_size];
   solveBoard(b);
   return b;
 }
 
-boolean solveBoard(int[][] b) {
-  for (int r = 0; r < grid_size; r++) {
-    for (int c = 0; c < grid_size; c++) {
-      if (b[r][c] == 0) {
-        int[] pool = shuffleNumbers();
-        for (int numTry : pool) {
-          if (isValid(b, r, c, numTry)) {
-            b[r][c] = numTry;
-            if (solveBoard(b)) return true;
-            b[r][c] = 0;
+boolean solveBoard(int[][] b){
+  for(int r=0;r<grid_size;r++){
+    for(int c=0;c<grid_size;c++){
+      if(b[r][c]==0){
+        int[] pool=shuffleNumbers();
+        for(int numTry:pool){
+          if(isValid(b,r,c,numTry)){
+            b[r][c]=numTry;
+            if(solveBoard(b)) return true;
+            b[r][c]=0;
           }
         }
         return false;
@@ -160,23 +222,57 @@ boolean solveBoard(int[][] b) {
   return true;
 }
 
-boolean isValid(int[][] b, int row, int col, int numTry) {
-  for (int i = 0; i < grid_size; i++) {
-    if (b[row][i] == numTry || b[i][col] == numTry) return false;
-  }
-  int sr = (row/3)*3, sc = (col/3)*3;
-  for (int r = sr; r < sr+3; r++)
-    for (int c = sc; c < sc+3; c++)
-      if (b[r][c] == numTry) return false;
+boolean isValid(int[][] b,int row,int col,int numTry){
+  for(int i=0;i<grid_size;i++)
+    if(b[row][i]==numTry || b[i][col]==numTry) return false;
+  int sr=(row/3)*3, sc=(col/3)*3;
+  for(int r=sr;r<sr+3;r++)
+    for(int c=sc;c<sc+3;c++)
+      if(b[r][c]==numTry) return false;
   return true;
 }
 
-int[] shuffleNumbers() {
-  int[] a = new int[9];
-  for (int i = 0; i < 9; i++) a[i] = i+1;
-  for (int i = 8; i > 0; i--) {
-    int j = int(random(i+1));
-    int t = a[i]; a[i] = a[j]; a[j] = t;
+int[] shuffleNumbers(){
+  int[] a=new int[9];
+  for(int i=0;i<9;i++) a[i]=i+1;
+  for(int i=8;i>0;i--){
+    int j=int(random(i+1));
+    int t=a[i]; a[i]=a[j]; a[j]=t;
   }
   return a;
+}
+
+void generatePuzzle(){
+  solution=generateSolution();
+  for(int r=0;r<grid_size;r++){
+    for(int c=0;c<grid_size;c++){
+      if(random(1)>0.5) num[r][c]=solution[r][c];
+      else num[r][c]=0;
+      isError[r][c]=false;
+    }
+  }
+}
+
+void checkSolution(){
+  boolean allCorrect=true;
+  for(int r=0;r<grid_size;r++){
+    for(int c=0;c<grid_size;c++){
+      if(num[r][c]!=0 && num[r][c]!=solution[r][c]){
+        isError[r][c]=true;
+        allCorrect=false;
+      }else{
+        isError[r][c]=false;
+      }
+    }
+  }
+  if(allCorrect) println("All correct!");
+  else println("Mistakes highlighted in red.");
+}
+
+void draw_circle_in_cell(int row,int col){
+  noStroke();
+  fill(255,0,0,150);
+  float x=col*cell_w+cell_w/2;
+  float y=grid_top+row*cell_h+cell_h/2;
+  ellipse(x,y,cell_w/2,cell_h/2);
 }
