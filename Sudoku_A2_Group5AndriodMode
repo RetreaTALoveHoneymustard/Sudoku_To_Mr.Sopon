@@ -89,13 +89,34 @@ void drawErrors() {
   strokeWeight(3);
   for (int r = 0; r < grid_size; r++) {
     for (int c = 0; c < grid_size; c++) {
-      if (isError[r][c]) {
+      if (num[r][c] == 0) continue;
+
+      boolean wrong = false;
+      if (solution != null && solution[r][c] != 0) {
+        wrong = (num[r][c] != solution[r][c]);
+      } else {
+        // fallback: detect conflicts by row, column, and 3x3 block
+        int v = num[r][c];
+        for (int i = 0; i < grid_size && !wrong; i++) {
+          if (i != c && num[r][i] == v) wrong = true;
+          if (i != r && num[i][c] == v) wrong = true;
+        }
+        int sr = (r / 3) * 3, sc = (c / 3) * 3;
+        for (int rr = sr; rr < sr + 3 && !wrong; rr++) {
+          for (int cc = sc; cc < sc + 3 && !wrong; cc++) {
+            if ((rr != r || cc != c) && num[rr][cc] == v) wrong = true;
+          }
+        }
+      }
+
+      if (wrong) {
         int x = c * cell_w;
         int y = grid_top + r * cell_h;
-        rect(x, y, cell_w, cell_h);
+        rect(x + 2, y + 2, cell_w - 4, cell_h - 4);
       }
     }
   }
+  noStroke();
 }
 
 
@@ -179,7 +200,7 @@ void mousePressed() {
   }
 }
 
-/*void keyPressed(){
+void keyPressed(){
   if(clicked_cell!=null){
     int r=clicked_cell[0], c=clicked_cell[1];
     if(key>='1' && key<='9') num[r][c]=key-'0';
@@ -195,7 +216,7 @@ void mousePressed() {
       for(int j=0;j<grid_size;j++)
         isError[i][j]=false;
   }
-} android mode don't usage*/
+}
 
 int[][] generateSolution(){
   int[][] b=new int[grid_size][grid_size];
@@ -265,7 +286,13 @@ void checkSolution(){
       }
     }
   }
-  if(allCorrect) println("All correct!");
+  if(allCorrect){
+    println("All correct!");
+    generatePuzzle();
+    clicked_cell=null;
+    selectedNumber=null;
+    showCorrect=false; 
+  }
   else println("Mistakes highlighted in red.");
 }
 
