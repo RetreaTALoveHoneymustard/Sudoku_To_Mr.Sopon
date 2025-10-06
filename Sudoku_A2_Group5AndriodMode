@@ -73,7 +73,8 @@ void drawNumbers() {
         int x = c * cell_w + cell_w/2;
         int y = grid_top + r * cell_h + cell_h/2;
         if (showCorrect && n == solution[r][c]) {
-          fill(0,180,0); // green for correct
+          draw_rect_in_cell(r, c,0,255,0);
+           // green for correct
         } else {
           fill(0); // black for normal
         }
