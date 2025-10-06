@@ -39,9 +39,10 @@ void setup() {
 
 void draw() {
   background(255);
+  drawCorrect();
   draw_table();
   if (clicked_cell != null) {
-    draw_rect_in_cell(clicked_cell[0], clicked_cell[1]); // draw highlight before digits
+    draw_rect_in_cell(clicked_cell[0], clicked_cell[1],225,225,225); // draw highlight before digits
   }
   drawNumbers();
   drawErrors();
@@ -310,9 +311,9 @@ void checkSolution(){
   else println("Mistakes highlighted in red.");
 }
 
-void draw_rect_in_cell(int row,int col){
+void draw_rect_in_cell(int row,int col,int r,int g ,int b){
   noFill();
-  fill(245, 245, 245);
+  fill(r, g, b);
   strokeWeight(3);
   float x=col*cell_w;
   float y=grid_top+row*cell_h;
