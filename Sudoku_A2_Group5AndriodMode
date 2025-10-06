@@ -45,7 +45,7 @@ void draw() {
   drawNumberSelector();
   drawButtons();
   if (clicked_cell != null) {
-    draw_circle_in_cell(clicked_cell[0], clicked_cell[1]);
+    draw_rect_in_cell(clicked_cell[0], clicked_cell[1]);
   }
 }
 
@@ -269,10 +269,10 @@ void checkSolution(){
   else println("Mistakes highlighted in red.");
 }
 
-void draw_circle_in_cell(int row,int col){
+void draw_rect_in_cell(int row,int col){
   noStroke();
-  fill(255,0,0,150);
-  float x=col*cell_w+cell_w/2;
-  float y=grid_top+row*cell_h+cell_h/2;
-  ellipse(x,y,cell_w/2,cell_h/2);
+  fill(245, 245, 245);
+  float x=col*cell_w;
+  float y=grid_top+row*cell_h;
+  rect(x,y,cell_w,cell_h);
 }
