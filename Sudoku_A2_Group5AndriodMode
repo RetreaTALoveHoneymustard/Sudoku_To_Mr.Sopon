@@ -73,12 +73,25 @@ void drawNumbers() {
         int x = c * cell_w + cell_w/2;
         int y = grid_top + r * cell_h + cell_h/2;
         if (showCorrect && n == solution[r][c]) {
-          draw_rect_in_cell(r, c,0,255,0);
+          fill(6, 2, 112);
            // green for correct
         } else {
           fill(0); // black for normal
         }
         text(n, x, y);
+      }
+    }
+  }
+}
+
+void drawCorrect(){
+for (int r = 0; r < grid_size; r++) {
+    for (int c = 0; c < grid_size; c++) {
+      int n = num[r][c];
+      if (n != 0) {
+        if (showCorrect && n == solution[r][c]) {
+          draw_rect_in_cell(r, c,170, 231, 146);
+          }
       }
     }
   }
