@@ -4,7 +4,8 @@ int grid_size     = 9;
 int grid_top      = 125;
 int grid_bottom   = 625;
 int selectorH     = 50;
-
+int xflowchart = 650;
+int yflowchart = 50;
 int cell_w, cell_h, cellSelectorW, selectorTop;
 int[][] num        = new int[grid_size][grid_size];
 boolean[][] isError = new boolean[grid_size][grid_size];
@@ -21,7 +22,7 @@ int resetX = 60, resetY;
 int showX, showY;
 
 void settings() {
-  size(900, canvas_height);
+  size(1000, canvas_height);
 }
 
 void setup() {
@@ -39,6 +40,7 @@ void setup() {
 
 void draw() {
   background(255);
+  //game section
   drawCorrect();
   draw_table();
   if (clicked_cell != null) {
@@ -48,6 +50,31 @@ void draw() {
   drawErrors();
   drawNumberSelector();
   drawButtons();
+  
+  //flowchart section
+  int y1 = start_stop_type(xflowchart, yflowchart, 100, "START");
+  drawArrow(xflowchart, yflowchart+25, y1-50);
+  
+  int y2 = process_type(xflowchart, y1, 100, "Initialize Grid");
+  drawArrow(xflowchart, y1+50, y2-40);
+  
+  int y3 = process_type(xflowchart, y2, 110, "User Interaction");
+  drawArrow(xflowchart, y2+55, y3-50);
+  
+  int y4 = decision_type(xflowchart, y3, 100, "Is Solved?");
+  text_box(xflowchart + 25,y4-75,1,"TRUE");
+  drawArrowHorizontal(xflowchart + 100, xflowchart + 200, y3);
+  text_box(xflowchart + 120,y3-20,1,"FALSE");
+  drawArrow(xflowchart+200, y3, y4-50);
+  drawArrow(xflowchart, y3+50, y4-50);
+  
+  int y5 = process_type(xflowchart, y4, 100, "Show Result");
+  drawArrow(xflowchart, y4+50, y5-70);
+  drawArrowHorizontal(xflowchart, xflowchart + 200, y5-70);
+  int y5alt = process_type(xflowchart+200, y4, 100, "Show Mistake");
+  drawArrow(xflowchart+200, y4+50, y5-50);
+  
+  start_stop_type(xflowchart+200, y5alt-25, 100, "END");
 }
 
 void draw_table() {
@@ -322,3 +349,85 @@ void draw_rect_in_cell(int row,int col,int r,int g ,int b){
   rect(x,y,cell_w,cell_h);
   noStroke();
 }
+
+int process_type(int posx, int posy, int size, String word) {
+  fill(255);
+  stroke(0);
+  strokeWeight(2);
+  rect(posx - size / 2, posy - size / 2, size, size); // centered box
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text(word, posx, posy);
+
+  return posy + size / 2 + 100; // bottom Y + spacing
+}
+
+int decision_type(int posx, int posy, int size, String word) {
+  fill(255);
+  stroke(0);
+  strokeWeight(2);
+  quad(
+    posx, posy - size / 2,         // top
+    posx + size, posy,             // right
+    posx, posy + size / 2,         // bottom
+    posx - size, posy              // left
+  );
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text(word, posx, posy);
+
+  return posy + size / 2 + 100; // bottom Y + spacing
+}
+
+int start_stop_type(int posx, int posy, int size, String word) {
+  fill(255);
+  stroke(0);
+  strokeWeight(2);
+  ellipse(posx, posy, size, size / 2); // horizontal ellipse
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text(word, posx, posy);
+
+  return posy + size / 4 + 100; // bottom Y + spacing
+}
+
+void drawArrow(int x, int y1, int y2) {
+  int arrowGap = 10;
+  stroke(0);
+  strokeWeight(2);
+  line(x, y1, x, y2 - arrowGap); // stop before the next shape
+
+  fill(0);
+  triangle(
+    x - 6, y2 - arrowGap,
+    x + 6, y2 - arrowGap,
+    x,     y2
+  );
+}
+
+void text_box(int posx, int posy, int size, String word) {
+  fill(255);
+  stroke(255);
+  rect(posx - size / 2, posy - size / 2, size, size); // centered box
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(16);
+  text(word, posx, posy);
+
+}
+
+void drawArrowHorizontal(int x1, int x2, int y) {
+  stroke(0);
+  strokeWeight(2);
+  line(x1, y, x2 - 10, y);
+  fill(0);
+  triangle(x2 - 10, y - 6, x2 - 10, y + 6, x2, y);
+}
+
