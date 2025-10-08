@@ -21,7 +21,7 @@ int resetX = 60, resetY;
 int showX, showY;
 
 void settings() {
-  size(canvas_width, canvas_height);
+  size(900, canvas_height);
 }
 
 void setup() {
@@ -53,15 +53,17 @@ void draw() {
 void draw_table() {
   strokeWeight(5);
   stroke(0);
-  line(0, grid_top, width, grid_top);
-  line(0, grid_bottom, width, grid_bottom);
+  line(0, grid_top, canvas_width, grid_top);
+  line(0, grid_bottom, canvas_width, grid_bottom);
   for (int i = 1; i < grid_size; i++) {
     int x = i * cell_w;
     int y = grid_top + i * cell_h;
     strokeWeight(i % 3 == 0 ? 3 : 1);
     line(x, grid_top, x, grid_bottom);
-    line(0, y, width, y);
+    line(0, y, canvas_width, y);
   }
+  strokeWeight(5);
+  line(canvas_width-1,grid_top,canvas_width-1,grid_bottom);
 }
 
 void drawNumbers() {
