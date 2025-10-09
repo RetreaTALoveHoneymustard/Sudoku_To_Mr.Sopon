@@ -119,7 +119,7 @@ for (int r = 0; r < grid_size; r++) {
     for (int c = 0; c < grid_size; c++) {
       int n = num[r][c];
       if (n != 0) {
-        if (showCorrect && n == solution[r][c]) {
+        if (n == solution[r][c]) {
           draw_rect_in_cell(r, c,170, 231, 146);
           }
       }
@@ -187,11 +187,6 @@ void drawButtons() {
   textSize(16);
   text("Reset Puzzle", resetX + btnW/2, resetY + btnH/2);
 
-  fill(showCorrect ? color(150,255,150) : 230);
-  stroke(0);
-  rect(showX, showY, btnW, btnH, 10);
-  fill(0);
-  text("Show Correct", showX + btnW/2, showY + btnH/2);
 }
 
 boolean inBox(int mx,int my,int x,int y,int x2,int y2){
@@ -237,11 +232,6 @@ void mousePressed() {
         isError[i][j]=false;
     return;
   }
-  // Show Correct button
-  if(inBox(mouseX,mouseY,showX,showY,showX+btnW,showY+btnH)){
-    showCorrect=!showCorrect;
-    return;
-  }
 }
 
 void keyPressed(){
@@ -250,7 +240,6 @@ void keyPressed(){
     if(key>='1' && key<='9') num[r][c]=key-'0';
     else if(key=='0' || keyCode==BACKSPACE || keyCode==DELETE) num[r][c]=0;
   }
-  if(key=='c' || key=='C') checkSolution();
   if(key=='r' || key=='R'){
     generatePuzzle();
     clicked_cell=null;
@@ -430,4 +419,3 @@ void drawArrowHorizontal(int x1, int x2, int y) {
   fill(0);
   triangle(x2 - 10, y - 6, x2 - 10, y + 6, x2, y);
 }
-
