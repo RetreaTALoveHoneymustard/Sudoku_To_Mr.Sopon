@@ -129,11 +129,17 @@ for (int r = 0; r < grid_size; r++) {
 
 void drawErrors() {
   noFill();
-  stroke(255,0,0);
   strokeWeight(3);
   for (int r = 0; r < grid_size; r++) {
     for (int c = 0; c < grid_size; c++) {
       if (num[r][c] == 0) continue;
+      
+      if (isError[r][c]) {
+        int x = c * cell_w;
+        int y = grid_top + r * cell_h;
+        stroke(255,178,102);
+        rect(x + 2, y + 2, cell_w - 4, cell_h - 4);
+      }
 
       boolean wrong = false;
       if (solution != null && solution[r][c] != 0) {
@@ -154,6 +160,7 @@ void drawErrors() {
       }
 
       if (wrong) {
+        stroke(255,0,0);
         int x = c * cell_w;
         int y = grid_top + r * cell_h;
         rect(x + 2, y + 2, cell_w - 4, cell_h - 4);
@@ -161,6 +168,34 @@ void drawErrors() {
     }
   }
   noStroke();
+}
+
+void markRowColConflicts(int r, int c) {
+  int v = num[r][c];
+  if (v == 0) return;
+
+  // Clear previous errors
+  for (int i = 0; i < grid_size; i++) {
+    for (int j = 0; j < grid_size; j++) {
+      isError[i][j] = false;
+    }
+  }
+
+  // Check row
+  for (int i = 0; i < grid_size; i++) {
+    if (i != c && num[r][i] == v) {
+      isError[r][i] = true;
+      isError[r][c] = true;
+    }
+  }
+
+  // Check column
+  for (int i = 0; i < grid_size; i++) {
+    if (i != r && num[i][c] == v) {
+      isError[i][c] = true;
+      isError[r][c] = true;
+    }
+  }
 }
 
 
@@ -207,15 +242,17 @@ void mousePressed() {
       }
     }
   }
+
   // Select number
   if(mouseY>=selectorTop && mouseY<=selectorTop+selectorH){
     for(int i=0;i<grid_size;i++){
       int x=i*cellSelectorW;
       if(mouseX>=x && mouseX<=x+cellSelectorW){
         selectedNumber=i+1;
-        if(clicked_cell!=null){
-          int r=clicked_cell[0], c=clicked_cell[1];
-          num[r][c]=selectedNumber;
+        if (clicked_cell != null) {
+            int r = clicked_cell[0], c = clicked_cell[1];
+            num[r][c] = selectedNumber;
+            markRowColConflicts(r, c); // ← this highlights all matching numbers in row/col
         }
         return;
       }
